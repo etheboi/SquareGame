@@ -1,0 +1,4 @@
+EULA for SquareGame server
+Read more at [LINK]
+
+eula=true

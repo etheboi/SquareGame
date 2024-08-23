@@ -1,0 +1,15 @@
+
+# Server Properties
+
+# The max amount of players allowed on 1 server
+max-players: 10
+
+# The name of the default world
+world-name: world
+
+# The port that the server will be hosted on
+server-port: 5555
+
+# true: only players with an account can play on the server
+# false: offline players will be able to connect to the server (not reccomended)
+online-mode: true
