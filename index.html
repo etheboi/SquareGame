@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SquareGame Website</title>
+    <style>
+        /* Base Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Header Styling */
+        .header {
+            background-color: #000;
+            padding: 10px 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Navbar Container */
+        .navbar {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* Button/Link Styling */
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            position: relative;
+            padding-bottom: 5px;
+            font-weight: 500;
+        }
+
+        /* Line Hover Effect */
+        .navbar a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            width: 0;
+            background-color: #ffffff;
+            transition: width 0.4s ease;
+        }
+
+        .navbar a:hover::after {
+            width: 100%;
+        }
+
+        /* Log In Button Styling */
+        .login-button {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            position: relative;
+            padding-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .login-button::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            width: 0;
+            background-color: #ffffff;
+            transition: width 0.4s ease;
+        }
+
+        .login-button:hover::after {
+            width: 100%;
+        }
+
+        /* SquareGame Text Styling */
+        .title {
+            text-align: center;
+            font-size: 4rem;
+            font-weight: bold;
+            margin-top: 30px;
+            color: #333;
+        }
+
+        /* Responsive Media Query */
+        @media (max-width: 768px) {
+            .navbar a {
+                font-size: 0.9rem;
+            }
+
+            .title {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar a {
+                font-size: 0.8rem;
+            }
+
+            .title {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <a href="./index.html">Home</a>
+            <a href="./download.html">Download</a>
+            <a href="./server.html">Server software</a>
+            <a href="#">Button 4</a>
+        </nav>
+        <!-- Log In/Logged In Button -->
+        <a href="#" id="login-button" class="login-button"></a>
+    </header>
+
+    <!-- SquareGame Title -->
+    <div class="title">
+        SquareGame
+    </div>
+
+    <script>
+        // Function to check login status in localStorage
+        function checkLoginStatus() {
+            const loginButton = document.getElementById('login-button');
+
+            // Check if the client is logged in based on localStorage
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+
+            if (isLoggedIn === 'true') {
+                // If logged in, set the button text to "Logged in"
+                loginButton.textContent = 'Logged in';
+                // Optionally, you can disable the button or make other adjustments
+                loginButton.href = '#'; // Keep it as a placeholder
+            } else {
+                // If not logged in, set the button text to "Log In" and redirect to login page
+                loginButton.textContent = 'Log In';
+                loginButton.href = './login.html';
+            }
+        }
+
+        // Call the function to check login status when the page loads
+        checkLoginStatus();
+    </script>
+</body>
+</html>
+

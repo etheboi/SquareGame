@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+    /* Base Styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    /* Header Styling */
+    .header {
+      background-color: #000;
+      padding: 10px 20px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Navbar Container */
+    .navbar {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    /* Button/Link Styling */
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+      position: relative;
+      padding-bottom: 5px;
+      font-weight: 500;
+    }
+
+    /* Line Hover Effect */
+    .navbar a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      width: 0;
+      background-color: #ffffff;
+      transition: width 0.4s ease;
+    }
+
+    .navbar a:hover::after {
+      width: 100%;
+    }
+
+    /* Login Form Styling */
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-container input {
+      width: 300px;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #000;
+      border-radius: 0;
+      background-color: #000;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .login-container button {
+      width: 300px;
+      padding: 10px;
+      margin-top: 20px;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .login-container button:hover {
+      background-color: #333;
+    }
+
+    /* Error Message Styling */
+    .error-popup {
+      position: absolute;
+      top: 20px;
+      width: 80%;
+      padding: 15px;
+      background-color: rgba(255, 0, 0, 0.5);
+      color: white;
+      font-size: 1rem;
+      text-align: center;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    /* Success Message Styling */
+    .success-popup {
+      position: fixed;
+      top: 20px;
+      width: 300px;
+      padding: 15px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 1rem;
+      text-align: center;
+      border-radius: 5px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .popup-close {
+      cursor: pointer;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header with Navigation -->
+  <header class="header">
+    <nav class="navbar">
+      <a href="./index.html">Home</a>
+      <a href="./download.html">Download</a>
+      <a href="./server">Server software</a>
+      <a href="#">Button 4</a>
+    </nav>
+    <a href="#" id="login-button" class="login-button"></a>
+  </header>
+
+  <!-- Login Form -->
+  <div class="login-container">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button onclick="handleLogin()">Login</button>
+    <div class="create-account">
+      <p>No account? <a href="#">Create one</a></p>
+    </div>
+  </div>
+
+<script>
+async function handleLogin() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  if (!email || !password) {
+    showErrorPopup("Please fill in all fields.");
+    return;
+  }
+
+  const data = {
+    request: "login",
+    email: email,
+    password: password
+  };
+
+  try {
+    const response = await fetch('http://localhost:5000/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (result.response === 'login_successful') {
+      showSuccessPopup("Login successful");
+
+      // Save login data to localStorage
+      localStorage.setItem('logged_in', 'true');
+      localStorage.setItem('user_data', JSON.stringify({ email, password }));
+
+      // Redirect after success
+      setTimeout(() => {
+        window.location.href = './index.html';
+      }, 2000);
+    } else if (result.response === 'incorrect_password') {
+      showErrorPopup("Error, incorrect password");
+    } else if (result.response === 'account_not_found') {
+      showErrorPopup("Error, account not found");
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+// Error and success popup functions
+function showSuccessPopup(message) {
+  // Implementation omitted for brevity
+}
+
+function showErrorPopup(message) {
+  // Implementation omitted for brevity
+}
+</script>
+</body>
+</html>
+
