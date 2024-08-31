@@ -157,7 +157,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.response === 'username_found') {
-                        loginButton.innerText = `Logged in as ${data.username}`;
+                        loginButton.innerText = `${data.username}`;
                         loginButton.href = "#"; // Change href to prevent navigating to login page when logged in
                     } else {
                         loginButton.innerText = 'Log In';
