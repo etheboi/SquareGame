@@ -124,6 +124,14 @@
       border-bottom: 2px solid #000;
     }
 
+    /* Error and Success Messages */
+    .message {
+      margin-top: 10px;
+      color: #d9534f;
+    }
+    .message.success {
+      color: #5bc0de;
+    }
   </style>
 </head>
 <body>
@@ -142,13 +150,14 @@
   <!-- Create Account Form -->
   <div class="login-container">
     <h2>Create Account</h2>
-    <input type="text" placeholder="Username" required>
-    <input type="email" placeholder="Email" required>
-    <input type="password" placeholder="Password" required>
-    <button>Create Account</button>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button id="create-button">Create Account</button>
     <div class="create-account">
       <p>Already have an account? <a href="./login.html">Log in</a></p>
     </div>
+    <div id="message" class="message"></div>
   </div>
 
   <script>
@@ -170,9 +179,42 @@
       }
     }
 
+    // Function to handle account creation
+    function createAccount() {
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const messageDiv = document.getElementById('message');
+
+      fetch('http://localhost:5000/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.response === 'successful') {
+          messageDiv.textContent = 'Account created successfully!';
+          messageDiv.className = 'message success';
+        } else if (data.response === 'email_inuse') {
+          messageDiv.textContent = 'Email is already in use.';
+        } else if (data.response === 'user_inuse') {
+          messageDiv.textContent = 'Username is already in use.';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        messageDiv.textContent = 'An error occurred. Please try again.';
+      });
+    }
+
+    // Set up event listener for button click
+    document.getElementById('create-button').addEventListener('click', createAccount);
+
     // Run the function when the page loads
     checkLoginStatus();
   </script>
 </body>
 </html>
-
