@@ -146,6 +146,37 @@
       font-weight: bold;
       margin-left: 10px;
     }
+    .popup {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 15px;
+        border-radius: 5px;
+        color: #fff;
+        font-size: 16px;
+        display: none;
+        z-index: 1000;
+    }
+
+    .popup.success {
+        background-color: #4CAF50;
+    }
+
+    .popup.error {
+        background-color: #f44336;
+    }
+
+    .popup .close-btn {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -172,61 +203,83 @@
   </div>
 
 <script>
-async function handleLogin() {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
+  async function handleLogin() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
 
-  if (!email || !password) {
-    showErrorPopup("Please fill in all fields.");
-    return;
+      const data = {
+          email: email,
+          password: password
+      };
+
+      console.log(`Sending data: ${JSON.stringify(data)}`);
+
+      try {
+          const response = await fetch('http://localhost:5000/login', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+          });
+
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+
+          const result = await response.json();
+          console.log(`Received response: ${JSON.stringify(result)}`);
+
+          if (result.response === 'login_successful') {
+              showSuccessPopup("Login successful");
+              localStorage.setItem('logged_in', 'true');
+              localStorage.setItem('user_data', JSON.stringify({ email, password }));
+              setTimeout(() => {
+                  window.location.href = './index.html';
+              }, 2000);
+          } else if (result.response === 'incorrect_password') {
+              showErrorPopup("Error, incorrect password");
+          } else if (result.response === 'account_not_found') {
+              showErrorPopup("Error, account not found");
+          }
+      } catch (error) {
+          console.error('Error:', error);
+          showErrorPopup("An error occurred while logging in.");
+      }
   }
 
-  const data = {
-    request: "login",
-    email: email,
-    password: password
-  };
 
-  try {
-    const response = await fetch('http://localhost:5000/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    });
 
-    const result = await response.json();
+  function showSuccessPopup(message) {
+      showPopup(message, 'success');
+  }
 
-    if (result.response === 'login_successful') {
-      showSuccessPopup("Login successful");
+  function showErrorPopup(message) {
+      showPopup(message, 'error');
+  }
 
-      // Save login data to localStorage
-      localStorage.setItem('logged_in', 'true');
-      localStorage.setItem('user_data', JSON.stringify({ email, password }));
+  function showPopup(message, type) {
+      const popup = document.createElement('div');
+      popup.className = `popup ${type}`;
+      popup.innerHTML = `${message} <button class="close-btn" onclick="closePopup(this)">×</button>`;
+      
+      document.body.appendChild(popup);
+      
+      popup.style.display = 'block';
 
-      // Redirect after success
+      // Automatically close the popup after 3 seconds
       setTimeout(() => {
-        window.location.href = './index.html';
-      }, 2000);
-    } else if (result.response === 'incorrect_password') {
-      showErrorPopup("Error, incorrect password");
-    } else if (result.response === 'account_not_found') {
-      showErrorPopup("Error, account not found");
-    }
-  } catch (error) {
-    console.error('Error:', error);
+          closePopup(popup);
+      }, 3000);
   }
-}
 
-// Error and success popup functions
-function showSuccessPopup(message) {
-  // Implementation omitted for brevity
-}
+  function closePopup(popup) {
+      if (popup.parentElement) {
+          popup.style.display = 'none';
+          document.body.removeChild(popup);
+      }
+  }
 
-function showErrorPopup(message) {
-  // Implementation omitted for brevity
-}
 </script>
 </body>
 </html>

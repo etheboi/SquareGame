@@ -129,7 +129,7 @@
             <a href="#">Button 4</a>
         </nav>
         <!-- Log In/Logged In Button -->
-        <a href="#" id="login-button" class="login-button"></a>
+        <a href="./login.html" id="login-button" class="login-button"></a>
     </header>
 
     <!-- SquareGame Title -->
@@ -138,27 +138,88 @@
     </div>
 
     <script>
-        // Function to check login status in localStorage
-        function checkLoginStatus() {
+        document.addEventListener('DOMContentLoaded', function() {
             const loginButton = document.getElementById('login-button');
 
-            // Check if the client is logged in based on localStorage
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            // Check if the user is logged in by checking localStorage
+            if (localStorage.getItem('logged_in') === 'true') {
+                const email = JSON.parse(localStorage.getItem('user_data')).email;
+                const password = JSON.parse(localStorage.getItem('user_data')).password;
 
-            if (isLoggedIn === 'true') {
-                // If logged in, set the button text to "Logged in"
-                loginButton.textContent = 'Logged in';
-                // Optionally, you can disable the button or make other adjustments
-                loginButton.href = '#'; // Keep it as a placeholder
+                // Automatically fetch the username
+                fetch('http://localhost:5000/get-username', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.response === 'username_found') {
+                        loginButton.innerText = `Logged in as ${data.username}`;
+                        loginButton.href = "#"; // Change href to prevent navigating to login page when logged in
+                    } else {
+                        loginButton.innerText = 'Log In';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loginButton.innerText = 'Log In';
+                });
             } else {
-                // If not logged in, set the button text to "Log In" and redirect to login page
-                loginButton.textContent = 'Log In';
-                loginButton.href = './login.html';
+                loginButton.innerText = 'Log In';
+            }
+        });
+
+        // Function to handle login
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const data = {
+                email: email,
+                password: password
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                console.log(`Received response: ${JSON.stringify(result)}`);
+
+                if (result.response === 'login_successful') {
+                    showSuccessPopup("Login successful");
+                    localStorage.setItem('logged_in', 'true');
+                    localStorage.setItem('user_data', JSON.stringify({ email, password }));
+                    setTimeout(() => {
+                        window.location.href = './index.html';
+                    }, 2000);
+                } else if (result.response === 'incorrect_password') {
+                    showErrorPopup("Error, incorrect password");
+                } else if (result.response === 'account_not_found') {
+                    showErrorPopup("Error, account not found");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorPopup("An error occurred while logging in.");
             }
         }
 
-        // Call the function to check login status when the page loads
-        checkLoginStatus();
+        // Success and Error popup functions
+        function showSuccessPopup(message) {
+            alert(message);
+        }
+
+        function showErrorPopup(message) {
+            alert(message);
+        }
     </script>
 </body>
 </html>
