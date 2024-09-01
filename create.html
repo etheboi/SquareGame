@@ -186,21 +186,21 @@
       const password = document.getElementById('password').value;
       const messageDiv = document.getElementById('message');
 
-      fetch('http://localhost:5000/create', {
+      fetch('http://localhost:1357/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ request: 'create', username, email, password }),
       })
       .then(response => response.json())
       .then(data => {
         if (data.response === 'successful') {
           messageDiv.textContent = 'Account created successfully!';
           messageDiv.className = 'message success';
-        } else if (data.response === 'email_inuse') {
+        } else if (data.response === 'email_exists') {
           messageDiv.textContent = 'Email is already in use.';
-        } else if (data.response === 'user_inuse') {
+        } else if (data.response === 'username_exists') {
           messageDiv.textContent = 'Username is already in use.';
         }
       })
