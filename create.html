@@ -1,220 +1,111 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Account</title>
-  <style>
-    /* Base Styling */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+// Import necessary modules
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
+// Port configuration
+const port = 5000;
 
-    /* Header Styling */
-    .header {
-      background-color: #000;
-      padding: 10px 20px;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
+// Initialize the accounts array
+let accounts = [];
 
-    /* Navbar Container */
-    .navbar {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
+// Load existing accounts from file (if any)
+const accountsFilePath = path.join(__dirname, 'accounts.json');
 
-    /* Button/Link Styling */
-    .navbar a {
-      color: white;
-      text-decoration: none;
-      font-size: 1rem;
-      position: relative;
-      padding-bottom: 5px;
-      font-weight: 500;
-    }
-
-    /* Line Hover Effect */
-    .navbar a::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 2px;
-      width: 0;
-      background-color: #ffffff;
-      transition: width 0.4s ease;
-    }
-
-    .navbar a:hover::after {
-      width: 100%;
-    }
-
-    /* Create Account Form Styling */
-    .login-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .login-container input {
-      width: 300px;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #000;
-      border-radius: 0;
-      background-color: #000;
-      color: #fff;
-      font-size: 1rem;
-    }
-
-    .login-container button {
-      width: 300px;
-      padding: 10px;
-      margin-top: 20px;
-      background-color: #000;
-      color: #fff;
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    .login-container button:hover {
-      background-color: #333;
-    }
-
-    .create-account {
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .create-account a {
-      color: #000;
-      text-decoration: none;
-      font-weight: bold;
-      border-bottom: 2px solid transparent;
-      transition: border-bottom 0.3s ease;
-    }
-
-    .create-account a:hover {
-      border-bottom: 2px solid #000;
-    }
-
-    /* Error and Success Messages */
-    .message {
-      margin-top: 10px;
-      color: #d9534f;
-    }
-    .message.success {
-      color: #5bc0de;
-    }
-  </style>
-</head>
-<body>
-  <!-- Header with Navigation -->
-  <header class="header">
-    <nav class="navbar">
-      <a href="./index.html">Home</a>
-      <a href="./download.html">Download</a>
-      <a href="./server">Server software</a>
-      <a href="#">Button 4</a>
-    </nav>
-    <!-- Log In/Logged In Button -->
-    <a href="#" id="login-button" class="login-button"></a>
-  </header>
-
-  <!-- Create Account Form -->
-  <div class="login-container">
-    <h2>Create Account</h2>
-    <input type="text" id="username" placeholder="Username" required>
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button id="create-button">Create Account</button>
-    <div class="create-account">
-      <p>Already have an account? <a href="./login.html">Log in</a></p>
-    </div>
-    <div id="message" class="message"></div>
-  </div>
-
-  <script>
-    // Function to check login status in localStorage
-    function checkLoginStatus() {
-      const loginButton = document.getElementById('login-button');
-
-      // Check if the client is logged in based on localStorage
-      const isLoggedIn = localStorage.getItem('isLoggedIn');
-
-      if (isLoggedIn === 'true') {
-        // If logged in, set the button text to "Logged in"
-        loginButton.textContent = 'Logged in';
-        loginButton.href = '#'; // Keep it as a placeholder
-      } else {
-        // If not logged in, set the button text to "Log In" and redirect to login page
-        loginButton.textContent = 'Log In';
-        loginButton.href = './login.html';
-      }
-    }
-
-    // Function to handle account creation
-    function createAccount() {
-      const username = document.getElementById('username').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const messageDiv = document.getElementById('message');
-
-      fetch('http://localhost:5000/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ request: 'create', username, email, password }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.response === 'successful') {
-          messageDiv.textContent = 'Account created successfully!';
-          messageDiv.className = 'message success';
-        } else if (data.response === 'email_exists') {
-          messageDiv.textContent = 'Email is already in use.';
-        } else if (data.response === 'username_exists') {
-          messageDiv.textContent = 'Username is already in use.';
+if (fs.existsSync(accountsFilePath)) {
+    const accountsData = fs.readFileSync(accountsFilePath, 'utf-8');
+    try {
+        accounts = JSON.parse(accountsData);
+        if (!Array.isArray(accounts)) {
+            accounts = [];
         }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        messageDiv.textContent = 'An error occurred. Please try again.';
-      });
+    } catch (err) {
+        console.error('Error parsing accounts file:', err);
+        accounts = [];
+    }
+}
+
+// Function to save accounts to file
+const saveAccounts = () => {
+    fs.writeFileSync(accountsFilePath, JSON.stringify(accounts, null, 2), 'utf-8');
+};
+
+// Create the server
+const server = http.createServer((req, res) => {
+    const { method, url } = req;
+
+    if (method === 'OPTIONS') {
+        res.writeHead(204, {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Max-Age': 2592000, // 30 days
+        });
+        res.end();
+        return;
     }
 
-    // Set up event listener for button click
-    document.getElementById('create-button').addEventListener('click', createAccount);
+    if (url === '/create' && method === 'POST') {
+        let body = '';
 
-    // Run the function when the page loads
-    checkLoginStatus();
-  </script>
-</body>
-</html>
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+
+                // Check if request is valid
+                if (data.request !== 'create' || !data.username || !data.email || !data.password) {
+                    res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                    res.end(JSON.stringify({ response: 'invalid_request' }));
+                    return;
+                }
+
+                // Check if accounts array is valid
+                if (!Array.isArray(accounts)) {
+                    accounts = [];
+                }
+
+                // Check if the email or username already exists
+                const emailExists = accounts.some(account => account.email === data.email);
+                const usernameExists = accounts.some(account => account.username === data.username);
+
+                if (emailExists) {
+                    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                    res.end(JSON.stringify({ response: 'email_exists' }));
+                } else if (usernameExists) {
+                    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                    res.end(JSON.stringify({ response: 'username_exists' }));
+                } else {
+                    // Create new account
+                    accounts.push({
+                        username: data.username,
+                        email: data.email,
+                        password: data.password, // In a real application, hash the password before storing it
+                    });
+
+                    // Save updated accounts array to file
+                    saveAccounts();
+
+                    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                    res.end(JSON.stringify({ response: 'successful' }));
+                }
+            } catch (err) {
+                console.error('Error handling request:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                res.end(JSON.stringify({ response: 'server_error' }));
+            }
+        });
+    } else {
+        // Handle 404 Not Found
+        res.writeHead(404, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+        res.end('404 Not Found');
+    }
+});
+
+// Start the server
+server.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
