@@ -161,60 +161,39 @@
   </div>
 
   <script>
-    // Function to check login status in localStorage
-    function checkLoginStatus() {
-      const loginButton = document.getElementById('login-button');
+        // Client-side code
+        function createAccount() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
 
-      // Check if the client is logged in based on localStorage
-      const isLoggedIn = localStorage.getItem('isLoggedIn');
-
-      if (isLoggedIn === 'true') {
-        // If logged in, set the button text to "Logged in"
-        loginButton.textContent = 'Logged in';
-        loginButton.href = '#'; // Keep it as a placeholder
-      } else {
-        // If not logged in, set the button text to "Log In" and redirect to login page
-        loginButton.textContent = 'Log In';
-        loginButton.href = './login.html';
-      }
-    }
-
-    // Function to handle account creation
-    function createAccount() {
-      const username = document.getElementById('username').value;
-      const email = document.getElement('email').value;
-      const password = document.getElementById('password').value;
-      const messageDiv = document.getElementById('message');
-
-      fetch('http://localhost:5000/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ request: 'create', username, email, password }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.response === 'successful') {
-          messageDiv.textContent = 'Account created successfully!';
-          messageDiv.className = 'message success';
-        } else if (data.response === 'email_exists') {
-          messageDiv.textContent = 'Email is already in use.';
-        } else if (data.response === 'username_exists') {
-          messageDiv.textContent = 'Username is already in use.';
+            fetch('http://localhost:5000/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, email, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.response === 'successful') {
+                    messageDiv.textContent = 'Account created successfully!';
+                    messageDiv.className = 'message success';
+                } else if (data.response === 'email_exists') {
+                    messageDiv.textContent = 'Email is already in use.';
+                } else if (data.response === 'username_exists') {
+                    messageDiv.textContent = 'Username is already in use.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageDiv.textContent = 'An error occurred. Please try again.';
+            });
         }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        messageDiv.textContent = 'An error occurred. Please try again.';
-      });
-    }
 
-    // Set up event listener for button click
-    document.getElementById('create-button').addEventListener('click', createAccount);
-
-    // Run the function when the page loads
-    checkLoginStatus();
-  </script>
+        // Event listener for create account button
+        document.getElementById('create-button').addEventListener('click', createAccount);
+    </script>
 </body>
 </html>
